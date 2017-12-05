@@ -3,6 +3,7 @@ import re
 import discord
 
 from src.btcapi import BTCClient
+from src.utils import load_text_commands
 
 class Commands(object):
 	'''
@@ -32,8 +33,17 @@ class Commands(object):
 			try:
 				await self.commands[c]['function'](channel, arg)
 			except KeyError as e:
-				await self.client.send_message(channel, '{} is not a command. Use !commands for list of all commands.'.format(c))
+				try:
+					await self.text_command(channel, c)
+				except (KeyError, NoCommandException) as ke:
+					await self.client.send_message(channel, '{} is not a command. Use !commands for list of all commands.'.format(c))
 
+	async def text_command(self, channel, command):
+		j = load_text_commands()
+		if j:
+			await self.client.send_message(channel, j[command])
+		else:
+			raise NoCommandException()
 	async def convert(self, channel, amount, currency):
 		'''
 		Calls the BTC API to convert a currency then responds to the user with the bitcoin value.
@@ -69,9 +79,17 @@ class Commands(object):
 		await self.chart(channel, timespan, BTCClient.trade_volume_chart)
 
 	async def commands(self, channel, arg):
-		e = discord.Embed(title='Commands', author=self.client.user.name)
+		e = discord.Embed(title='BTCBot Commands', color=0x0dedf1)
+		e.set_author(name=self.client.user.name, icon_url=self.client.user.default_avatar_url)
+		message = ''
 		for x in self.commands.keys():
-			e.add_field(name=x, value=self.commands[x]['description'])
+			message += str('**!' + x +'** - ' + self.commands[x]['description'] + '\n')
+		e.add_field(name='Commands', value=message, inline=False)
+
+		message = ''
+		for t in load_text_commands().keys():
+			message += str('**!' + t + '**\n')
+		e.add_field(name='Text Only Commands', value=message, inline=False)
 
 		await self.client.send_message(channel, embed=e)
 
@@ -87,3 +105,5 @@ class Commands(object):
 			
 		await self.client.send_message(channel, embed=e)
 		
+class NoCommandException(Exception):
+	pass
