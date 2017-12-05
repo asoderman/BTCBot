@@ -14,3 +14,4 @@ def plot_api(j):
 	plt.xlabel(j['period'])
 	plt.plot_date(x, y, linestyle='-')
 	plt.savefig('plot.png')
+	plt.clf()
