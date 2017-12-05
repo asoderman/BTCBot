@@ -30,12 +30,23 @@ class BTCClient(object):
 		return r.content.decode('UTF-8')
 
 	@classmethod
+	def chart_api(cls, chart, timespan):
+		'''
+		Partial function for charts API
+		chart specifies the chart being accessed
+		returns json data
+		'''
+
+		d = {'timespan' : timespan, 'format': 'json'}
+		r = requests.get(BASE + '/charts/{}'.format(chart), params=d)
+		return json.load(r.content)
+
+	@classmethod
 	def market_price_chart(cls, timespan):
 		'''
 		/market-price API endpoint.
 		Does not return anything however a plot is saved to plot.png
 		'''
-		d = {'timespan' : timespan, 'format': 'json'}
-		r = requests.get(BASE + '/charts/market-price', params=d)
-		j = json.loads(r.content)
+		j = chart_api('market-price', timespan)
 		plot_api(j)
+
