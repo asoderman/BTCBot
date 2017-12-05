@@ -43,33 +43,29 @@ class Commands(object):
 		e.set_author(name='blockchain.info')
 		await self.client.send_message(channel, embed=e)
 
+	async def chart(self, channel, timespan, api_call):
+	'''
+	General chart function
+	'''
+		if not timespan:
+			timespan = '5weeks'
+		api_call(timespan)
+		await self.client.send_file(channel, 'plot.png')
+
 	async def market_value(self, channel, timespan):
 		'''
 		Makes a call to the BTC api for market_value data then plots the data and responds.
 		'''
-		if not timespan:
-			timespan = '5weeks'
-		BTCClient.market_price_chart(timespan)
-		await self.client.send_file(channel, 'plot.png')
+		await self.chart(channel, timespan, BTCClient.market_price_chart)
 
 	async def BTC_in_circulation(self, channel, timespan):
-
-		if not timespan:
-			timespan = '5weeks'
-		BTCClient.BTC_in_circulation_chart(timespan)
-		await self.client.send_file(channel, 'plot.png')
+		await self.chart(channel, timespan, BTCClient.BTC_in_circulation_chart)
 
 	async def market_cap(self, channel, timespan):
-		if not timespan:
-			timespan = '5weeks'
-		BTCClient.market_cap_chart(timespan)
-		await self.client.send_file(channel, 'plot.png')
+		await self.chart(channel, timespan, BTCClient.market_cap_chart)
 
 	async def trade_volume(self, channel, timespan):
-		if not timespan:
-			timespan = '5weeks'
-		BTCClient.trade_volume_chart(timespan)
-		await self.client.send_file(channel, 'plot.png')
+		await self.chart(channel, timespan, BTCClient.trade_volume_chart)
 
 	async def commands(self, channel, arg):
 		e = discord.Embed(title='Commands', author=self.client.user.name)
