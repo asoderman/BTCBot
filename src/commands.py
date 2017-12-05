@@ -68,7 +68,7 @@ class Commands(object):
 	async def trade_volume(self, channel, timespan):
 		if not timespan:
 			timespan = '5weeks'
-		BTCClient.trade_volume(timespan)
+		BTCClient.trade_volume_chart(timespan)
 		await self.client.send_file(channel, 'plot.png')
 
 	async def commands(self, channel, arg):

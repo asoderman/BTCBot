@@ -61,6 +61,6 @@ class BTCClient(object):
 		plot_api(j)
 
 	@classmethod
-	def trade_volume(cls, timespan):
+	def trade_volume_chart(cls, timespan):
 		j = cls.chart_api('trade-volume', timespan)
 		plot_api(j)

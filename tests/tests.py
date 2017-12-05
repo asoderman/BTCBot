@@ -9,6 +9,7 @@ import discord
 sys.path.append('../src')
 
 from btcapi import *
+from commands import Commands
 import bot
 
 class TestBTCAPIClient(object):
@@ -40,7 +41,7 @@ class TestBTCAPIClient(object):
 		output = BTCClient.ticker()
 
 		assert_equals(output, None)
-		
+
 
 class TestBot(object):
 
@@ -53,8 +54,8 @@ class TestBot(object):
 
 	@classmethod
 	def teardown_class(cls):
-		cls.mock_BTC_ticker.stop()
-		cls.mock_client_instance.stop()
+		cls.mock_BTC_ticker_patcher.stop()
+		cls.mock_client_instance_patcher.stop()
 
 	def test_ticker(self):
 		'''
@@ -86,6 +87,53 @@ class TestBot(object):
 		loop = asyncio.get_event_loop()
 		loop.run_until_complete(go())
 		loop.close()
+
+class TestCommands(object):
+
+	@classmethod
+	def setup_class(cls):
+		cls.c = Commands(Mock())
+		async def assert_fileuploaded(channel, filename):
+			'''
+			Ensures the filename is expected and that the file upload is called
+			'''
+			assert_equals(filename, 'plot.png')
+		cls.c.client.send_file = assert_fileuploaded
+		asyncio.set_event_loop(asyncio.new_event_loop())
+		cls.loop = asyncio.get_event_loop()
+
+
+	@classmethod
+	def teardown_class(cls):
+		cls.loop.close()
+
+	def test_market_value(self):
+		'''
+		Ensures the correct api endpoint is called and the file is uploaded
+		'''
+		with patch('src.btcapi.BTCClient.market_price_chart') as api:
+			api.side_effect = Mock()
+			self.loop.run_until_complete(self.c.market_value(None, None))
+			assert_true(api.side_effect.called)
+
+	def test_BTC_in_circulation(self):
+		with patch('src.btcapi.BTCClient.BTC_in_circulation_chart') as api:
+			api.side_effect = Mock()
+			self.loop.run_until_complete(self.c.BTC_in_circulation(None, None))
+			assert_true(api.side_effect.called)
+
+	def test_market_cap(self):
+		with patch('src.btcapi.BTCClient.market_cap_chart') as api:
+			api.side_effect = Mock()
+			self.loop.run_until_complete(self.c.market_cap(None, None))
+			assert_true(api.side_effect.called)
+
+	def test_trade_volume(self):
+		with patch('src.btcapi.BTCClient.trade_volume_chart') as api:
+			api.side_effect = Mock()
+			self.loop.run_until_complete(self.c.trade_volume(None, None))
+			assert_true(api.side_effect.called)
+
 
 
 def assert_in_list(element, l):
