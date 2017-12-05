@@ -1,4 +1,6 @@
 {
 	"whatis" : "https://bitcoin.org/en/getting-started",
-	"buy" : "https://bitcoin.org/en/exchanges"
+	"buy" : "https://bitcoin.org/en/exchanges",
+	"contribute": "https://github.com/asoderman/BTCBot",
+	"donate" : "15QSpdUoQUfP2SS8MtnYff5LSnaBkNLTtV"
 }
