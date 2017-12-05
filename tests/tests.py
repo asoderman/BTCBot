@@ -142,10 +142,10 @@ class TestCommands(object):
 				'Total received' : 'total_received'
 				}
 			test_data= {'ADDRESS' : {
-											'final_balance' : 0.004, 
-											'n_tx': 2, 
-											'total_received' : 0.004
-											}}
+									'final_balance' : 0.004, 
+									'n_tx': 2, 
+									'total_received' : 0.004
+									}}
 			api.return_value = test_data
 			async def assert_message(channel, embed=None):
 				if embed:
