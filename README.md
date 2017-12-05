@@ -4,5 +4,12 @@ Features:
 
 * Bitcoin ticker in the "playing" section
 * Convert USD -> BTC
-* Upload market value chart in chat (on request)
+* Check bitcoin balance via public key
+* Upload chart in chat (on request)
+
+Supported charts:
+* Market Value
+* Bitcoins in circulation
+* Market capitalization
+* Trade Volume
 
