@@ -7,6 +7,7 @@ import discord
 import requests
 
 from src.btcapi import BTCClient
+from src.commands import Commands
 from src.utils import load_settings
 
 logging.basicConfig(filename='info.log',level=logging.INFO)
@@ -37,7 +38,8 @@ async def on_message(message):
 		return
 	else:
 		if message.content.startswith('!'):
-			await Commands._parse_command(message.channel, message.content)
+			c = Commands(client)
+			await c._parse_command(message.channel, message.content)
 		else:
 			for code in CURRENCY:
 				s = re.search(r'([\d\.]+).?({})'.format(code), message.content)
@@ -45,7 +47,8 @@ async def on_message(message):
 					logging.info('Converting currency for {}'.format(message.author))
 					value = s.group(1)
 					currency = s.group(2)
-					await Commands.convert(message.channel, value, currency)
+					c = Commands(client)
+					await c.convert(message.channel, value, currency)
 
 async def set_status(message):
 	'''
@@ -85,59 +88,6 @@ async def ticker(debug=None):
 			asyncio.sleep(retry)
 		if debug:
 			break
-
-class Commands(object):
-	'''
-	Class containing static methods to handle messages the bot receives.
-	'''
-
-	@classmethod
-	async def _parse_command(cls, channel, message):
-		'''
-		Parses message for command then calls proper command from dict.
-		'''
-		commands = {'convert': cls.convert, 
-					'marketvalue' : cls.market_value,
-					'commands' : cls.commands}
-		s = re.search(r'!([A-z]+) ?([A-z0-9]*)', message)
-		if s:
-			c = s.group(1) #command
-			arg = s.group(2) #arg
-			try:
-				await commands[c](channel, arg)
-			except KeyError as e:
-				await client.send_message(channel, '{} is not a command. Use !commands for list of all commands.'.format(c))
-
-	@classmethod
-	async def convert(cls, channel, amount, currency):
-		'''
-		Calls the BTC API to convert a currency then responds to the user with the bitcoin value.
-		'''
-		result = BTCClient.tobtc(amount, currency)
-		m = '{} {} -> {} BTC'.format(amount, currency, result)
-		e = discord.Embed(title='', description=m)
-		e.set_author(name='blockchain.info')
-		await client.send_message(channel, embed=e)
-
-	@classmethod
-	async def market_value(cls, channel, timeframe):
-		'''
-		Makes a call to the BTC api for market_value data then plots the data and responds.
-		'''
-		if not timeframe:
-			timeframe = '5weeks'
-		BTCClient.market_price_chart(timeframe)
-		await client.send_file(channel, 'plot.png')
-
-	@classmethod
-	async def commands(cls, channel, arg):
-		e = discord.Embed(title='Commands', author=client.user.name)
-		for x in cls.__dict__.keys():
-			if not x.startswith('_'):
-				e.add_field(name=x.replace('_', '', value='-'))
-
-		await client.send_message(channel, embed=e)
-
 
 def run():
 	'''

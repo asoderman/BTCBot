@@ -40,7 +40,7 @@ class TestBTCAPIClient(object):
 		output = BTCClient.ticker()
 
 		assert_equals(output, None)
-
+		
 
 class TestBot(object):
 

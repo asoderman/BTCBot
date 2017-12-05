@@ -39,7 +39,7 @@ class BTCClient(object):
 
 		d = {'timespan' : timespan, 'format': 'json'}
 		r = requests.get(BASE + '/charts/{}'.format(chart), params=d)
-		return json.load(r.content)
+		return json.loads(r.content)
 
 	@classmethod
 	def market_price_chart(cls, timespan):
@@ -47,6 +47,20 @@ class BTCClient(object):
 		/market-price API endpoint.
 		Does not return anything however a plot is saved to plot.png
 		'''
-		j = chart_api('market-price', timespan)
+		j = cls.chart_api('market-price', timespan)
 		plot_api(j)
 
+	@classmethod
+	def BTC_in_circulation_chart(cls, timespan):
+		j = cls.chart_api('total-bitcoins', timespan)
+		plot_api(j)
+
+	@classmethod
+	def market_cap_chart(cls, timespan):
+		j = cls.chart_api('market-cap', timespan)
+		plot_api(j)
+
+	@classmethod
+	def trade_volume(cls, timespan):
+		j = cls.chart_api('trade-volume', timespan)
+		plot_api(j)
