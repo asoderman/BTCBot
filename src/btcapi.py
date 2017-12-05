@@ -64,3 +64,9 @@ class BTCClient(object):
 	def trade_volume_chart(cls, timespan):
 		j = cls.chart_api('trade-volume', timespan)
 		plot_api(j)
+
+	@classmethod
+	def balance(cls, address):
+		d = {"active": address}
+		r = requests.get(BASE + '/balance', params=d)
+		return json.loads(r.content)

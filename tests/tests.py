@@ -134,6 +134,30 @@ class TestCommands(object):
 			self.loop.run_until_complete(self.c.trade_volume(None, None))
 			assert_true(api.side_effect.called)
 
+	def test_balance(self):
+		with patch('src.btcapi.BTCClient.balance') as api:
+			pretty_names = {
+				'Final balance' : 'final_balance', 
+				'Number of transactions' : 'n_tx', 
+				'Total received' : 'total_received'
+				}
+			test_data= {'ADDRESS' : {
+											'final_balance' : 0.004, 
+											'n_tx': 2, 
+											'total_received' : 0.004
+											}}
+			api.return_value = test_data
+			async def assert_message(channel, embed=None):
+				if embed:
+					for field in embed.fields:
+						if field.name in pretty_names.keys():
+							assert_equals(str(test_data['ADDRESS'][pretty_names[field.name]]), field.value)
+						else:
+							raise AssertionError('Unexpected field name.')
+				else:
+					raise AssertionError('No embed provided with message.')
+			self.c.client.send_message.side_effect = assert_message
+			self.loop.run_until_complete(self.c.balance(None, 'ADDRESS'))
 
 
 def assert_in_list(element, l):

@@ -16,7 +16,8 @@ class Commands(object):
 					'circulation' : {'function' : self.BTC_in_circulation, 'description' : 'Bitcoins in circulation chart'},
 					'marketcap' : {'function' : self.market_cap, 'description' : 'Market capitalization chart' },
 					'tradevolume' : {'function' : self.trade_volume, 'description' : 'USD trade volume chart' },
-					'commands' : {'function' : self.commands, 'description' : 'List of commands' }
+					'commands' : {'function' : self.commands, 'description' : 'List of commands' },
+					'balance' : {'function' : self.balance, 'description' : 'Shows balance info on a public address'}
 					}
 
 	async def _parse_command(self, channel, message):
@@ -44,9 +45,9 @@ class Commands(object):
 		await self.client.send_message(channel, embed=e)
 
 	async def chart(self, channel, timespan, api_call):
-	'''
-	General chart function
-	'''
+		'''
+		General chart function
+		'''
 		if not timespan:
 			timespan = '5weeks'
 		api_call(timespan)
@@ -73,3 +74,16 @@ class Commands(object):
 			e.add_field(name=x, value=self.commands[x]['description'])
 
 		await self.client.send_message(channel, embed=e)
+
+	async def balance(self, channel, address):
+		j = BTCClient.balance(address)
+		e = discord.Embed(title='Balance')
+		for item in ['final_balance', 'n_tx', 'total_received']:
+			if item is 'n_tx':
+				name = 'Number of transactions'
+			else:
+				name = item.replace('_', ' ').capitalize()
+			e.add_field(name=name, value=j[address][item], inline=True)
+			
+		await self.client.send_message(channel, embed=e)
+		
