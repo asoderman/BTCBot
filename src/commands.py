@@ -1,4 +1,5 @@
 import re
+import datetime
 
 import discord
 
@@ -95,14 +96,15 @@ class Commands(object):
 
 	async def balance(self, channel, address):
 		j = BTCClient.balance(address)
-		e = discord.Embed(title='Balance')
+		e = discord.Embed(title='Balance', color=0x56f442)
 		for item in ['final_balance', 'n_tx', 'total_received']:
 			if item is 'n_tx':
 				name = 'Number of transactions'
 			else:
 				name = item.replace('_', ' ').capitalize()
 			e.add_field(name=name, value=j[address][item], inline=True)
-			
+		foot = 'Balance generated on: {} UTC'.format(datetime.datetime.utcnow().strftime("%a, %d %B %Y %I:%M%p"))
+		e.set_footer(text=foot)
 		await self.client.send_message(channel, embed=e)
 		
 class NoCommandException(Exception):
