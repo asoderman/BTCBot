@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 SETTINGS = load_settings()
 
-CURRENCY = ["USD"]
+CURRENCY = ["USD", "BTC"]
 
 client = discord.Client()
 

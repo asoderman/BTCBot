@@ -160,6 +160,33 @@ class TestCommands(object):
 			self.c.client.send_message.side_effect = assert_message
 			self.loop.run_until_complete(self.c.balance(None, 'ADDRESS'))
 
+	def test_conversion_to_bitcoin(self):
+		test_input = ('60', 'USD')
+		test_result = 0.004
+		with patch('src.btcapi.BTCClient.tobtc') as api:
+			api.return_value = test_result
+			async def assert_message(channel, embed=None):
+				if embed:
+					assert_equals(embed.description, '60 USD -> 0.004 BTC')
+				else:
+					raise AssertionError('No embed provided with message')
+			self.c.client.send_message.side_effect = assert_message
+			self.loop.run_until_complete(self.c.convert(None, test_input[0], test_input[1]))
+
+	def test_conversion_to_USD(self):
+		test_input = ('0.004', 'BTC')
+		test_result = 60
+		with patch('src.btcapi.BTCClient.ticker') as api:
+			api.return_value = {'USD' : {'last' : test_result}}
+			async def assert_message(channel, embed=None):
+				if embed:
+					out = '{} BTC -> ~${} USD'.format(test_input[0], float(test_input[0]) * test_result)
+					assert_equals(embed.description, out)
+				else:
+					raise AssertionError('No embed provided with message')
+			self.c.client.send_message.side_effect = assert_message
+			self.loop.run_until_complete(self.c.convert(None, test_input[0], test_input[1]))
+
 
 def assert_in_list(element, l):
 	for e in l:

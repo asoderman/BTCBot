@@ -48,9 +48,14 @@ class Commands(object):
 	async def convert(self, channel, amount, currency):
 		'''
 		Calls the BTC API to convert a currency then responds to the user with the bitcoin value.
+		Or calls the ticker api to convert BTC -> USD
 		'''
-		result = BTCClient.tobtc(amount, currency)
-		m = '{} {} -> {} BTC'.format(amount, currency, result)
+		if currency.upper() == 'USD':
+			result = BTCClient.tobtc(amount, currency)
+			m = '{} {} -> {} BTC'.format(amount, currency, result)
+		elif currency.upper() == 'BTC':
+			result = BTCClient.ticker()['USD']['last'] * float(amount)
+			m = '{} BTC -> ~${:,.2f} USD'.format(amount, result)
 		e = discord.Embed(title='', description=m)
 		e.set_author(name='blockchain.info')
 		await self.client.send_message(channel, embed=e)
