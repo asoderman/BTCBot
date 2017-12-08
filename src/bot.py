@@ -8,6 +8,7 @@ import requests
 
 from src.btcapi import BTCClient
 from src.commands import Commands
+from src.preferences import Preferences
 from src.utils import load_settings
 
 logging.basicConfig(filename='info.log',level=logging.INFO)
@@ -28,13 +29,29 @@ async def on_ready():
 	print(client.user.name)
 	print(client.user.id)
 	asyncio.get_event_loop().create_task(ticker())
+	Preferences.collect_channels(client.servers)
+
+@client.event
+async def on_server_join(server):
+	'''
+	When joining a server create preferences for it
+	'''
+	Preferences.add_server(server)
+
 
 @client.event
 async def on_message(message):
+	await handle_message(message, client)
+
+async def handle_message(message, client):
 	'''
 	Handles every message the bot sees. Does not respond to its own messages.
+	Note: moved from the on_message function because it is easier to test this way
 	'''
-	if client.user.name == message.author.name:
+	if client.user.name == message.author.name or Preferences.ignored(message.channel.id):
+		if message.content.startswith('!unignore'):
+			c = Commands(client)
+			await c.unignore(message.channel, None)
 		return
 	else:
 		if message.content.startswith('!'):

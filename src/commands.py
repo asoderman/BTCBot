@@ -4,6 +4,7 @@ import datetime
 import discord
 
 from src.btcapi import BTCClient
+from src.preferences import Preferences
 from src.utils import load_text_commands
 
 class Commands(object):
@@ -19,7 +20,9 @@ class Commands(object):
 					'marketcap' : {'function' : self.market_cap, 'description' : 'Market capitalization chart' },
 					'tradevolume' : {'function' : self.trade_volume, 'description' : 'USD trade volume chart' },
 					'commands' : {'function' : self.commands, 'description' : 'List of commands' },
-					'balance' : {'function' : self.balance, 'description' : 'Shows balance info on a public address'}
+					'balance' : {'function' : self.balance, 'description' : 'Shows balance info on a public address'},
+					'ignore' : {'function' : self.ignore, 'description' : 'Have the bot stop posting here' },
+					'unignore' : {'function' : self.unignore, 'description' : 'Have bot start posting again'}
 					}
 
 	async def _parse_command(self, channel, message):
@@ -111,6 +114,12 @@ class Commands(object):
 		foot = 'Balance generated on: {} UTC'.format(datetime.datetime.utcnow().strftime("%a, %d %B %Y %I:%M%p"))
 		e.set_footer(text=foot)
 		await self.client.send_message(channel, embed=e)
+
+	async def ignore(self, channel, arg):
+		Preferences.ignore(channel.id)
+
+	async def unignore(self, channel, arg):
+		Preferences.unignore(channel.id)
 		
 class NoCommandException(Exception):
 	pass

@@ -11,6 +11,7 @@ sys.path.append('../src')
 from btcapi import *
 from commands import Commands
 import bot
+from preferences import *
 
 class TestBTCAPIClient(object):
 
@@ -51,11 +52,13 @@ class TestBot(object):
 		cls.mock_BTC_ticker = cls.mock_BTC_ticker_patcher.start()
 		cls.mock_client_instance_patcher = patch('src.bot.client')
 		cls.mock_client_instance = cls.mock_client_instance_patcher.start()
+		cls.loop = asyncio.get_event_loop()
 
 	@classmethod
 	def teardown_class(cls):
 		cls.mock_BTC_ticker_patcher.stop()
 		cls.mock_client_instance_patcher.stop()
+		cls.loop.close()
 
 	def test_ticker(self):
 		'''
@@ -84,9 +87,28 @@ class TestBot(object):
 			bot.client = self.mock_client_instance
 			await bot.ticker(debug=True)
 		
-		loop = asyncio.get_event_loop()
-		loop.run_until_complete(go())
-		loop.close()
+		self.loop.run_until_complete(go())
+
+	def test_responds_if_ignored(self):
+		'''
+		Ensures the bot will not respond to a channel that is ignored
+		'''
+		with patch('src.preferences.Preferences.ignored') as check:
+			check.return_value = True
+			
+			self.mock_client_instance.send_message = Mock()
+			self.mock_client_instance = Mock(spec=discord.Client)
+			self.mock_client_instance.user = Mock(spec=discord.User)
+			self.mock_client_instance.user.name = 'baz'
+			
+			message = Mock(spec=discord.Message)
+			message.author = Mock(spec=discord.User)
+			message.author.name = 'bar'
+			message.content = 'do nothing'
+		
+			self.loop.run_until_complete(bot.handle_message(message, self.mock_client_instance))
+			assert_true(not self.mock_client_instance.send_message.called)
+			
 
 class TestCommands(object):
 
@@ -187,6 +209,27 @@ class TestCommands(object):
 			self.c.client.send_message.side_effect = assert_message
 			self.loop.run_until_complete(self.c.convert(None, test_input[0], test_input[1]))
 
+	def test_ignore(self):
+		'''
+		Ensures the ignore command ignores properly
+		'''
+		with patch('src.preferences.Preferences.ignore') as api:
+			api.side_effect = Mock()
+			channel = Mock()
+			channel.id = '1'
+			self.loop.run_until_complete(self.c.ignore(channel, None))
+			assert_true(api.side_effect.called)
+
+	def test_unignore(self):
+		'''
+		Ensures the unignore command works properly
+		'''
+		with patch('src.preferences.Preferences.unignore') as api:
+			api.side_effect = Mock()
+			channel = Mock()
+			channel.id = '1'
+			self.loop.run_until_complete(self.c.unignore(channel, None))
+			assert_true(api.side_effect.called)
 
 def assert_in_list(element, l):
 	for e in l:
