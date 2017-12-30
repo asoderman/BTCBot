@@ -129,3 +129,28 @@ class TestCommands(object):
             channel.id = '1'
             self.loop.run_until_complete(self.c.unignore(channel, None))
             assert_true(api.side_effect.called)
+
+    def test_register(self):
+        '''
+        Ensures developers can register commands programatically
+        '''
+        @self.c.register('description')
+        def test_command():
+            self.test_var = True
+            assert_true(self.test_var)
+            return True
+        assert_true(self.c.test_command())
+
+    def test_call_registered_command(self):
+        
+        async def assert_message(message):
+            assert_equals('Success', message)
+        self.c.client.send_message.side_effect = assert_message
+
+        @self.c.register('description of my function')
+        async def t():
+            await self.c.client.send_message('Success')
+
+        self.loop.run_until_complete(self.c._parse_command(None, 't'))
+        assert_true(self.c.commands['t'] is not None)
+        self.loop.run_until_complete(self.c.commands['t']['function']())

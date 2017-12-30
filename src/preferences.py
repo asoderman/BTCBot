@@ -9,7 +9,10 @@ class Preferences(object):
 
 	@classmethod
 	def ignored(cls, channel_id):
-		return Channel.get_channel(channel_id).ignore
+		try:
+			return Channel.get_channel(channel_id).ignore
+		except AttributeError:
+			return False
 
 	@classmethod
 	def ignore(cls, channel_id):

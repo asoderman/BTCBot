@@ -121,5 +121,20 @@ class Commands(object):
 	async def unignore(self, channel, arg):
 		Preferences.unignore(channel.id)
 		
+	def register(self, description=None):
+		'''
+		A decorator to register a function with the command class
+		Usage: 
+		@c.register('optional description')
+		async def my_command(self):
+			pass
+
+
+		'''
+		def wrapper(f):
+			setattr(self, f.__name__, f)
+			self.commands[f.__name__] = {'function' : getattr(self, f.__name__), 'description' : description}
+		return wrapper
+
 class NoCommandException(Exception):
 	pass

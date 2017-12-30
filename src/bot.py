@@ -19,6 +19,7 @@ SETTINGS = load_settings()
 CURRENCY = ["USD", "BTC"]
 
 client = discord.Client()
+commands = Commands(client)
 
 @client.event
 async def on_ready():
@@ -50,13 +51,11 @@ async def handle_message(message, client):
 	'''
 	if client.user.name == message.author.name or Preferences.ignored(message.channel.id):
 		if message.content.startswith('!unignore'):
-			c = Commands(client)
-			await c.unignore(message.channel, None)
+			await commands.unignore(message.channel, None)
 		return
 	else:
 		if message.content.startswith('!'):
-			c = Commands(client)
-			await c._parse_command(message.channel, message.content)
+			await commands._parse_command(message.channel, message.content)
 		else:
 			for code in CURRENCY:
 				s = re.search(r'([\d\.]+).?({})'.format(code), message.content)
@@ -64,8 +63,7 @@ async def handle_message(message, client):
 					logging.info('Converting currency for {}'.format(message.author))
 					value = s.group(1)
 					currency = s.group(2)
-					c = Commands(client)
-					await c.convert(message.channel, value, currency)
+					await commands.convert(message.channel, value, currency)
 
 async def set_status(message):
 	'''
