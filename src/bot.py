@@ -20,6 +20,7 @@ CURRENCY = ["USD", "BTC"]
 
 client = discord.Client()
 commands = Commands(client)
+from src.commandext import *
 
 @client.event
 async def on_ready():

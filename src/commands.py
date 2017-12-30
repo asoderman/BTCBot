@@ -125,7 +125,7 @@ class Commands(object):
 		'''
 		A decorator to register a function with the command class
 		Usage: 
-		@c.register('optional description')
+		@c.register('description')
 		async def my_command(self):
 			pass
 
