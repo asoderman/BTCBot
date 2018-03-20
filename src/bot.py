@@ -63,7 +63,7 @@ async def ticker(debug=None):
 	Runs infinitely updating the bot 'playing' message to ticker data.
 	debug parameter ensures it only runs once and shortens sleep time
 	'''
-	if debug: 
+	if debug:
 		s = 0.001 # short sleep for testing/debugging
 	else:
 		s = 20 # regular sleep in seconds
@@ -76,7 +76,7 @@ async def ticker(debug=None):
 				if key == 'symbol':
 					continue
 				else:
-					messages.append("{}: {}{}".format(key.capitalize(), data['USD']['symbol'], data['USD'][key]))	
+					messages.append("{}: {}{:.2f}".format(key.capitalize(), data['USD']['symbol'], data['USD'][key]))
 			i = 0
 			while i < 10:
 				await set_status(messages[i % len(messages)])
